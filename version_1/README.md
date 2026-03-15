@@ -21,6 +21,6 @@ make test
 ## Files
 
 myMorse.c      : main Morse encoder/decoder
-test_runner.c  : automated test program
+testRunner.c  : automated test program
 Makefile       : build script
 input.txt      : example input file
