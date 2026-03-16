@@ -1,19 +1,22 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -O2
+CFLAGS=-Wall -Wextra -O2 -Iinclude
+
+SRC=src/main.c src/morseTree.c
+OBJ=main.o morseTree.o
 
 all: my_morse testRunner
 
-my_morse: main.o morseTree.o
-	$(CC) $(CFLAGS) -o my_morse main.o morseTree.o
+my_morse: $(OBJ)
+	$(CC) $(CFLAGS) -o my_morse $(OBJ)
 
-main.o: main.c morseTree.h
-	$(CC) $(CFLAGS) -c main.c
+main.o: src/main.c include/morseTree.h
+	$(CC) $(CFLAGS) -c src/main.c
 
-morseTree.o: morseTree.c morseTree.h
-	$(CC) $(CFLAGS) -c morseTree.c
+morseTree.o: src/morseTree.c include/morseTree.h
+	$(CC) $(CFLAGS) -c src/morseTree.c
 
-testRunner: testRunner.c
-	$(CC) $(CFLAGS) -o testRunner testRunner.c
+testRunner: test/testRunner.c
+	$(CC) $(CFLAGS) -o testRunner test/testRunner.c
 
 clean:
-	rm -f *.o my_morse testRunner output.txt tmp_input.txt
+	rm -f *.o my_morse testRunner
