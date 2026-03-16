@@ -26,11 +26,9 @@ Morse table[] = {
 const char* encodeChar(char c)
 {
     c = toupper(c);
-
     for(size_t i=0;i<TABLE_SIZE;i++)
         if(table[i].c == c)
             return table[i].morse;
-
     return NULL;
 }
 
@@ -39,20 +37,17 @@ char decodeToken(const char *tok)
     for(size_t i=0;i<TABLE_SIZE;i++)
         if(strcmp(table[i].morse,tok)==0)
             return table[i].c;
-
     return '?';
 }
-
-/* ================= ENCODE ================= */
 
 void encodeFile(const char *inFile,const char *outFile)
 {
     FILE *in=fopen(inFile,"r");
     FILE *out=fopen(outFile,"w");
-
     if(!in||!out) return;
 
     int c;
+    int printed=0;
     int first=1;
 
     while((c=fgetc(in))!=EOF)
@@ -62,6 +57,7 @@ void encodeFile(const char *inFile,const char *outFile)
         if(c==' ')
         {
             fprintf(out,"|");
+            if(printed<20){ printf("|"); printed++; }
             first=1;
             continue;
         }
@@ -70,29 +66,37 @@ void encodeFile(const char *inFile,const char *outFile)
         if(!m) continue;
 
         if(!first)
+        {
             fprintf(out," ");
+            if(printed<20){ printf(" "); printed++; }
+        }
 
         fprintf(out,"%s",m);
 
+        for(int i=0;m[i] && printed<20;i++)
+        {
+            printf("%c",m[i]);
+            printed++;
+        }
+
         first=0;
     }
+
+    printf("\n");
 
     fclose(in);
     fclose(out);
 }
 
-/* ================= DECODE ================= */
-
 void decodeFile(const char *inFile,const char *outFile)
 {
     FILE *in=fopen(inFile,"r");
     FILE *out=fopen(outFile,"w");
-
     if(!in||!out) return;
 
     char token[32];
     int idx=0;
-
+    int printed=0;
     int c;
 
     while((c=fgetc(in))!=EOF)
@@ -117,11 +121,16 @@ void decodeFile(const char *inFile,const char *outFile)
                 }
 
                 fprintf(out,"%c",d);
+                if(printed<20){ printf("%c",d); printed++; }
+
                 idx=0;
             }
 
             if(c=='|')
+            {
                 fprintf(out," ");
+                if(printed<20){ printf(" "); printed++; }
+            }
         }
     }
 
@@ -139,30 +148,29 @@ void decodeFile(const char *inFile,const char *outFile)
         }
 
         fprintf(out,"%c",d);
+        if(printed<20) printf("%c",d);
     }
+
+    printf("\n");
 
     fclose(in);
     fclose(out);
 }
-
-/* ================= MAIN ================= */
 
 int main(int argc,char *argv[])
 {
     if(argc!=3)
     {
         printf("Usage:\n");
-        printf("./myMorse -e input.txt\n");
-        printf("./myMorse -d input.txt\n");
+        printf("./my_morse -e input.txt\n");
+        printf("./my_morse -d input.txt\n");
         return 0;
     }
 
     if(strcmp(argv[1],"-e")==0)
         encodeFile(argv[2],"output.txt");
-
     else if(strcmp(argv[1],"-d")==0)
         decodeFile(argv[2],"output.txt");
-
     else
         printf("Invalid option\n");
 

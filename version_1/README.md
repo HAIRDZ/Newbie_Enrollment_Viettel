@@ -1,26 +1,45 @@
-# Morse Code Encoder / Decoder
+# Morse Code Encoder / Decoder (Version 1)
 
-This project implements a Morse code encoder and decoder in C.
+## Giới thiệu
 
-## Build
+Chương trình C dùng để **mã hóa (encode)** và **giải mã (decode)** mã Morse từ file.
+Kết quả được **in ra màn hình tối đa 20 ký tự đầu tiên** và **lưu toàn bộ vào `output.txt`**.
 
+## Biên dịch
+
+```bash
 make
+```
 
-## Encode
+Sau khi build sẽ tạo ra:
 
+```
+my_morse
+testRunner
+```
+
+## Cách sử dụng
+
+Encode text sang Morse:
+
+```bash
 ./my_morse -e input.txt
+```
 
-## Decode
+Decode Morse sang text:
 
+```bash
 ./my_morse -d input.txt
+```
 
-## Run tests
+## Kiểm thử
 
-make test
+```bash
+./testRunner
+```
 
-## Files
+## Yêu cầu môi trường
 
-myMorse.c      : main Morse encoder/decoder
-testRunner.c  : automated test program
-Makefile       : build script
-input.txt      : example input file
+* GCC
+* Linux / Unix
+

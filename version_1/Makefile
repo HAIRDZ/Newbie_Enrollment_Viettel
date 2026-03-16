@@ -1,22 +1,13 @@
 CC=gcc
-CFLAGS=-Wall -Wextra
+CFLAGS=-Wall -Wextra -O2
 
-TARGET=myMorse
-SRC=myMorse.c
+all: my_morse testRunner
 
-TEST=testRunner
-TESTSRC=testRunner.c
+my_morse: src/myMorse.c
+	$(CC) $(CFLAGS) -o my_morse src/myMorse.c
 
-all: $(TARGET) $(TEST)
-
-$(TARGET):
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
-
-$(TEST):
-	$(CC) $(CFLAGS) $(TESTSRC) -o $(TEST)
-
-test: all
-	./$(TEST)
+testRunner: test/testRunner.c
+	$(CC) $(CFLAGS) -o testRunner test/testRunner.c
 
 clean:
-	rm -f $(TARGET) $(TEST) output.txt test_input.txt test_morse.txt invalid.txt
+	rm -f my_morse testRunner output.txt tmp_input.txt
