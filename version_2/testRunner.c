@@ -77,9 +77,6 @@ void randomString(char *s,int len){
         if(prev==' ' && c==' ')
             c='A';
 
-        if(i==0 && c==' ')
-            c='A';
-
         if(i==len-1 && c==' ')
             c='A';
 
@@ -100,6 +97,8 @@ int main(){
     printf("==== MORSE DEBUG TEST RUNNER ====\n\n");
 
     const char *cases[]={
+        "HELLO",
+        " HELLO",
         "HELLO",
         "HELLO WORLD",
         "A B C",

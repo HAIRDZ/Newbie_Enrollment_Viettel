@@ -1,11 +1,11 @@
 CC=gcc
 CFLAGS=-Wall -Wextra
 
-TARGET=my_morse
+TARGET=myMorse
 SRC=myMorse.c
 
-TEST=test_runner
-TESTSRC=test_runner.c
+TEST=testRunner
+TESTSRC=testRunner.c
 
 all: $(TARGET) $(TEST)
 

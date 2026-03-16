@@ -3,181 +3,134 @@
 #include <string.h>
 #include <ctype.h>
 
-#define MAX_INPUT 1000
-
 typedef struct {
-    char character;
+    char c;
     const char *morse;
-} MorseMap;
+} Morse;
 
-/* Morse table (. -> + , - -> ===) */
-
-MorseMap morseTable[] = {
-
-{'A',"+==="},{'B',"===+++"},{'C',"===+===+"},{'D',"===++"},{'E',"+"},
-{'F',"++===+"},{'G',"======+"},{'H',"++++"},{'I',"++"},{'J',"+========="},
-{'K',"===+==="},{'L',"+===++"},{'M',"======"},{'N',"===+"},{'O',"========="},
-{'P',"+======+"},{'Q',"======+==="},{'R',"+===+"},{'S',"+++"},{'T',"==="},
-{'U',"++==="},{'V',"+++==="},{'W',"+======"},{'X',"===++==="},{'Y',"===+======"},{'Z',"======++"},
-
-/* numbers */
-
-{'1',"+============"},
-{'2',"++=========="},
-{'3',"+++========"},
-{'4',"++++======"},
-{'5',"+++++"},
-{'6',"===++++"},
-{'7',"======+++"},
-{'8',"=========++"},
-{'9',"============+"},
-{'0',"=============="}
-
+Morse table[] = {
+{'A',"+="},{'B',"=+++"},{'C',"=+=+"},{'D',"=++"},
+{'E',"+"},{'F',"++=+"},{'G',"==+"},{'H',"++++"},
+{'I',"++"},{'J',"+==="},{'K',"=+="},{'L',"+=++"},
+{'M',"=="},{'N',"=+"},{'O',"==="},{'P',"+==+"},
+{'Q',"==+="},{'R',"+=+"},{'S',"+++"},{'T',"="},
+{'U',"++="},{'V',"+++="},{'W',"+=="},{'X',"=++="},
+{'Y',"=+=="},{'Z',"==++"},
+{'0',"====="},{'1',"+===="},{'2',"++==="},{'3',"+++=="},
+{'4',"++++="},{'5',"+++++"},{'6',"=++++"},{'7',"==+++"},
+{'8',"===++"},{'9',"====+"}
 };
 
-int tableSize = sizeof(morseTable) / sizeof(MorseMap);
+#define TABLE_SIZE (sizeof(table)/sizeof(table[0]))
 
 const char* encodeChar(char c)
 {
-    for(int i = 0; i < tableSize; i++)
-    {
-        if(morseTable[i].character == c)
-            return morseTable[i].morse;
-    }
+    c = toupper(c);
+
+    for(size_t i=0;i<TABLE_SIZE;i++)
+        if(table[i].c == c)
+            return table[i].morse;
 
     return NULL;
 }
 
-char decodeToken(const char *token)
+char decodeToken(const char *tok)
 {
-    for(int i = 0; i < tableSize; i++)
-    {
-        if(strcmp(morseTable[i].morse, token) == 0)
-            return morseTable[i].character;
-    }
+    for(size_t i=0;i<TABLE_SIZE;i++)
+        if(strcmp(table[i].morse,tok)==0)
+            return table[i].c;
 
     return '?';
 }
 
-void encodeFile(const char *fileName)
+/* ================= ENCODE ================= */
+
+void encodeFile(const char *inFile,const char *outFile)
 {
-    FILE *in = fopen(fileName,"r");
+    FILE *in=fopen(inFile,"r");
+    FILE *out=fopen(outFile,"w");
 
-    if(!in)
-    {
-        printf("Cannot open file\n");
-        return;
-    }
-
-    FILE *out = fopen("output.txt","w");
+    if(!in||!out) return;
 
     int c;
-    int printed = 0;
+    int first=1;
 
-    while((c = fgetc(in)) != EOF)
+    while((c=fgetc(in))!=EOF)
     {
-        if(c == ' ')
+        if(c=='\n') continue;
+
+        if(c==' ')
         {
-            fprintf(out,"   ");
-
-            if(printed < 20)
-            {
-                if(printed + 3 <= 20)
-                {
-                    printf("   ");
-                    printed += 3;
-                }
-                else
-                {
-                    int remain = 20 - printed;
-                    fwrite("   ",1,remain,stdout);
-                    printed = 20;
-                }
-            }
-
+            fprintf(out,"|");
+            first=1;
             continue;
         }
 
-        c = toupper(c);
+        const char *m=encodeChar(c);
+        if(!m) continue;
 
-        const char *morse = encodeChar(c);
+        if(!first)
+            fprintf(out," ");
 
-        if(!morse)
-            continue;
+        fprintf(out,"%s",m);
 
-        fprintf(out,"%s ",morse);
-
-        int len = strlen(morse) + 1;
-
-        if(printed < 20)
-        {
-            if(printed + len <= 20)
-            {
-                printf("%s ",morse);
-                printed += len;
-            }
-            else
-            {
-                int remain = 20 - printed;
-                fwrite(morse,1,remain,stdout);
-                printed = 20;
-            }
-        }
+        first=0;
     }
-
-    printf("\n");
 
     fclose(in);
     fclose(out);
 }
 
-void decodeFile(const char *fileName)
+/* ================= DECODE ================= */
+
+void decodeFile(const char *inFile,const char *outFile)
 {
-    FILE *in = fopen(fileName,"r");
+    FILE *in=fopen(inFile,"r");
+    FILE *out=fopen(outFile,"w");
 
-    if(!in)
+    if(!in||!out) return;
+
+    char token[32];
+    int idx=0;
+
+    int c;
+
+    while((c=fgetc(in))!=EOF)
     {
-        printf("Cannot open file\n");
-        return;
-    }
-
-    FILE *out = fopen("output.txt","w");
-
-    char buffer[MAX_INPUT];
-
-    if(!fgets(buffer,sizeof(buffer),in))
-    {
-        fclose(in);
-        fclose(out);
-        return;
-    }
-
-    int printed = 0;
-    int i = 0;
-    int len = strlen(buffer);
-
-    while(i < len)
-    {
-        while(i < len && buffer[i] == ' ')
-            i++;
-
-        if(i >= len)
-            break;
-
-        char token[128];
-        int k = 0;
-
-        while(i < len && (buffer[i] == '+' || buffer[i] == '='))
+        if(c=='+'||c=='=')
         {
-            token[k++] = buffer[i];
-            i++;
+            token[idx++]=c;
         }
+        else
+        {
+            if(idx>0)
+            {
+                token[idx]='\0';
 
-        token[k] = '\0';
+                char d=decodeToken(token);
+                if(d=='?')
+                {
+                    printf("Invalid Morse\n");
+                    fclose(in);
+                    fclose(out);
+                    return;
+                }
 
-        char c = decodeToken(token);
+                fprintf(out,"%c",d);
+                idx=0;
+            }
 
-        if(c == '?')
+            if(c=='|')
+                fprintf(out," ");
+        }
+    }
+
+    if(idx>0)
+    {
+        token[idx]='\0';
+
+        char d=decodeToken(token);
+        if(d=='?')
         {
             printf("Invalid Morse\n");
             fclose(in);
@@ -185,60 +138,33 @@ void decodeFile(const char *fileName)
             return;
         }
 
-        fprintf(out,"%c",c);
-
-        if(printed < 20)
-        {
-            printf("%c",c);
-            printed++;
-        }
-
-        int spaces = 0;
-
-        while(i < len && buffer[i] == ' ')
-        {
-            spaces++;
-            i++;
-        }
-
-        if(spaces >= 3)
-        {
-            fprintf(out," ");
-
-            if(printed < 20)
-            {
-                printf(" ");
-                printed++;
-            }
-        }
+        fprintf(out,"%c",d);
     }
-
-    printf("\n");
 
     fclose(in);
     fclose(out);
 }
 
-int main(int argc, char *argv[])
+/* ================= MAIN ================= */
+
+int main(int argc,char *argv[])
 {
-    if(argc != 3)
+    if(argc!=3)
     {
-        printf("Usage: my_morse -e|-d <input_file>\n");
-        return 1;
+        printf("Usage:\n");
+        printf("./myMorse -e input.txt\n");
+        printf("./myMorse -d input.txt\n");
+        return 0;
     }
 
-    if(strcmp(argv[1],"-e") == 0)
-    {
-        encodeFile(argv[2]);
-    }
-    else if(strcmp(argv[1],"-d") == 0)
-    {
-        decodeFile(argv[2]);
-    }
+    if(strcmp(argv[1],"-e")==0)
+        encodeFile(argv[2],"output.txt");
+
+    else if(strcmp(argv[1],"-d")==0)
+        decodeFile(argv[2],"output.txt");
+
     else
-    {
         printf("Invalid option\n");
-    }
 
     return 0;
 }
