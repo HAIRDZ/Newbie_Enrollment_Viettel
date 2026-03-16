@@ -1,0 +1,8 @@
+build/
+*.o
+*.out
+my_morse
+testRunner
+tmp_*
+output.txt
+
